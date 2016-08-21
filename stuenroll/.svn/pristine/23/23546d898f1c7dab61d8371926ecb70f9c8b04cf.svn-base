@@ -1,0 +1,103 @@
+package cn.gov.hrss.ln.stuenroll.profession;
+//最新
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.jfinal.aop.Before;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.tx.Tx;
+
+import cn.gov.hrss.ln.stuenroll.db.I_ProfessionDao;
+
+public class ProfessionService implements I_ProfessionService {
+	private I_ProfessionDao i_ProfessionDao;
+	
+	@Override
+	public List<Record> searchProfessionInYearAtDropDown(int year) {
+		List<Record> list=i_ProfessionDao.searchProfessionInYearAtDropDown(year);
+		return list;
+	}
+	@Override
+	public List<Record> searchProfessionStatistics(long start, long length) {
+		List<Record> list = new ArrayList<>();
+		
+		List<Record> professionNameAndOrganizationRecord = i_ProfessionDao.searchProfessionOrganization(start, length);
+		List<Record> yearRecord = i_ProfessionDao.searchProfessionYearAmount(start, length);
+		List<Record> classAndStudentRecord = i_ProfessionDao.searchProfessionClassAmount(start, length);
+		List<Record> studentGetAJobRecord = i_ProfessionDao.searchProfessionStudentAmountGetAJob(start, length);
+		
+		for (int i = 0; i < professionNameAndOrganizationRecord.size(); i++) {
+			Record record = new Record();
+			record.setColumns(professionNameAndOrganizationRecord.get(i));
+			record.set("yearAmount", yearRecord.get(i).getLong("yearAmount"));
+			record.set("classAmount", classAndStudentRecord.get(i).getLong("classAmount"));
+			double allStudents = classAndStudentRecord.get(i).getLong("studentAmount");
+			record.set("studentAmount", allStudents);
+			double studentGetAJob = studentGetAJobRecord.get(i).getLong("studentGetAJob");
+			DecimalFormat df = new DecimalFormat("0.00");
+//			System.out.println(allStudents+"  "+studentGetAJob);
+			if(allStudents==0){
+				record.set("jobRate",0);
+			}
+			else{
+				String jobRate = df.format((studentGetAJob/allStudents)*100);
+				record.set("jobRate",jobRate);				
+			}
+			list.add(record);
+		}
+		return list;
+	}
+	@Override
+	public long searchProfessionCount() {
+		long count = i_ProfessionDao.searchProfessionCount();
+		return count;
+	}
+	@Override
+	public int addProfession(HashMap map) {
+		int count = i_ProfessionDao.addProfession(map);
+		return count;
+	}
+
+	@Override
+	public int updateProfession(HashMap map) {
+		int count = i_ProfessionDao.updateProfession(map);
+		return count;
+	}
+	
+	@Before(Tx.class)
+	@Override
+	public int deleteProfessionById(Long[] id) {
+		int count = i_ProfessionDao.deleteProfessionById(id);
+		return count;
+	}
+	
+	@Override
+	public List<Record> searchProfessionsWithConditions(Map<String, Object> map, Long start, Long length) {
+		List<Record> records = i_ProfessionDao.searchProfessionsWithConditions(map, start, length);
+		return records;
+	}
+
+	
+	public I_ProfessionDao getI_ProfessionDao() {
+		return i_ProfessionDao;
+	}
+
+	public void setI_ProfessionDao(I_ProfessionDao i_ProfessionDao) {
+		this.i_ProfessionDao = i_ProfessionDao;
+	}
+	@Override
+	public List<Record> searchAllProfession() {
+		List<Record> records = i_ProfessionDao.searchAllProfession();
+		return records;
+	}
+	@Override
+	public void importProfession(Object... objects) {
+		if (objects.length == 2){
+			i_ProfessionDao.importProfession(objects);
+		}
+		
+	}
+}

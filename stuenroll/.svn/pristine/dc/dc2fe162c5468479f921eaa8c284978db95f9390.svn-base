@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="message.css"/>
+<link rel="shortcut icon" href="../../../img/icon.png" />
+<link rel="stylesheet" type="text/css" href="../../../js/plugin/toastr.css" />
+<link rel="stylesheet" type="text/css" href="../../../font/iconfont.css" />
+<title></title>
+</head>
+<body>
+	<div class="main-container no-select">
+		<div class="getmailbar">
+			<div class="daymail">
+				<div class="date"><span>2天前</span><span>(2封)</span></div>
+				<dl class="mail-list">
+					<dt class="mail-item">
+						<dl class="title-list">
+							<dt class="title-item">系统消息</dt>
+							<dt class="title-item">系统管理员</dt>
+							<dt class="title-item">这是一条测试消息</dt>
+							<dt class="title-item">18:00</dt>
+						</dl>
+					</dt>
+					<dt class="mail-item"></dt>
+				</dl>
+			</div>
+		</div>
+	</div>
+	<script src="../../../js/jquery-2.1.4.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../../js/plugin/toastr.js" type="text/javascript" charset="utf-8"></script>
+	<!--<script src="../../js/permission.js" type="text/javascript" charset="utf-8"></script>-->
+	<script src="message.js" type="text/javascript" charset="utf-8"></script>
+</body>
+</html>

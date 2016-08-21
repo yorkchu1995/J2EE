@@ -1,0 +1,130 @@
+package cn.gov.hrss.ln.stuenroll.profession;
+import java.util.ArrayList;
+//最新
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
+import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.spring.Spring;
+
+@Spring("professionController")
+public class ProfessionController extends Controller implements I_ProfessionController {
+	private I_ProfessionService i_ProfessionService;
+	private int rowInPage;
+	private final Long HRSS = 738620600423157760L; 
+
+	@Override
+	public void searchProfessionInYearAtDropDown() {
+		Integer year = getParaToInt("year");
+		List<Record> list = i_ProfessionService.searchProfessionInYearAtDropDown(year);
+		renderJson("result", list);
+	}
+
+	@RequiresPermissions({ "6_4" })
+	@Override
+	public void searchProfessionStatistics() {
+		String organization = getSessionAttr("organization");
+		if (organization.equals("辽宁省就业网") == true) {
+			Long page = getParaToLong("page");
+			if (page == null) {
+				page = 1L;
+			}
+			long start = (page - 1) * rowInPage;
+			long length = rowInPage;
+
+			List<Record> list = i_ProfessionService.searchProfessionStatistics(start, length);
+			System.out.println(page+"  "+start);
+			System.out.println(list);
+			renderJson("result", list);
+		}
+	}	
+	@RequiresPermissions({"6_4"})
+	@Override
+	public void searchProfessionCount() {
+		long count = i_ProfessionService.searchProfessionCount();
+		renderJson("result",count);
+	}	
+
+	@RequiresPermissions({ "6_1" })
+	@Override
+	public void addProfession() {
+		String name = getPara("name");
+		HashMap map = new HashMap();
+		map.put("name", name);
+		int success = i_ProfessionService.addProfession(map);
+		renderJson("result", success);
+	}
+
+	@RequiresPermissions({ "6_3" })
+	@Override
+	public void updateProfession() {
+		String name = getPara("name");
+		Long professionId = getParaToLong("id");
+		System.out.println(professionId);
+		HashMap map = new HashMap();
+		map.put("name", name);
+		map.put("professionId", professionId);
+
+		int success = i_ProfessionService.updateProfession(map);
+		renderJson("result", success);
+
+	}
+
+	@RequiresPermissions({ "6_2" })
+	@Override
+	public void deleteProfessionById() {
+		Long[] id = getParaValuesToLong("id");
+		int i = i_ProfessionService.deleteProfessionById(id);
+		renderJson("result", i);
+	}
+
+	public I_ProfessionService getI_ProfessionService() {
+		return i_ProfessionService;
+	}
+
+	public void setI_ProfessionService(I_ProfessionService i_ProfessionService) {
+		this.i_ProfessionService = i_ProfessionService;
+	}
+
+	public int getRowInPage() {
+		return rowInPage;
+	}
+
+	public void setRowInPage(int rowInPage) {
+		this.rowInPage = rowInPage;
+	}
+	
+	@RequiresPermissions({"6_4"})
+	@Override
+	public void searchProfessionsWithOrganization() {
+		Long organizationId = getParaToLong("organizationId");
+		Integer year = getParaToInt("year");
+		Map<String, Object> map = new HashMap<>();
+		if (organizationId != null && !HRSS.equals(organizationId)) {
+			map.put("organizationId", organizationId);
+		}
+		map.put("year", year);
+		List<Record> brecords = i_ProfessionService.searchProfessionsWithConditions(map, 0L, 10000L);
+		List<Record> records = new ArrayList<>();
+		if (brecords.size() != 0) {
+			String id = brecords.get(0).getStr("professionId");
+			records.add(brecords.get(0));
+			String id2 = "";
+			Record record = null;
+			for (int i = 1; i < brecords.size(); i++) {
+				record = brecords.get(i);
+				id2 = record.getStr("professionId");
+				if (!id.equals(id2)) {
+					id = id2;
+					records.add(record);
+				}
+			}
+		}
+		renderJson("result", records);
+	}
+
+}
